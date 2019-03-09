@@ -29,6 +29,7 @@
 
 
 
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,48 +41,27 @@ using TrickyUnits;
 namespace CLEO {
 
     class CLEO{
-
-
         static CLEO[] CLEOs;
-
         readonly string FileName;
-
         readonly byte[] EOLN; // How to separate EOLNS (if system cannot detect this the Unix way will be default).
-
         readonly FlagParse flags;
 
 
-
         CLEO(string filename,FlagParse aflags) {
-
             FileName = filename;
-
             flags = aflags;
-
             if (File.Exists(FileName)) {
-
                 Console.Write($"File {FileName} does not exist. Create it ? <Y/N> ");
-
                 var x = Console.ReadKey(true);
-
                 if (x.Key==ConsoleKey.Y) {
-
                     Console.WriteLine("Yes");
-
                     QuickStream.SaveString(filename, "");
-
                     if (flags.GetBool("wineoln")) EOLN = new byte[] { 13, 10 }; else EOLN = new byte[] { 10 };
-
                 } else {
-
                     Console.WriteLine("No");
-
                     Environment.Exit(1);
-
                 }
-
             }
-
         }
 
 
