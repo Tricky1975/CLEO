@@ -24,6 +24,10 @@
 // Version: 19.03.09
 // EndLic
 
+
+
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,12 +40,31 @@ namespace CLEO {
 
     class CLEO{
 
-        static void Main(string[] args) {
-            MKL.Version("CLEO (Command Line Editor Oversimplefied) - CLEO.cs","19.03.09");
-            MKL.Lic    ("CLEO (Command Line Editor Oversimplefied) - CLEO.cs","GNU General Public License 3");
-            Console.WriteLine($"CLEO v{MKL.Newest}");
+        static void ShowVersionInfo() {
+            Console.WriteLine(MKL.All(true));
         }
 
+        static void Main(string[] args) {
+            var fp = new FlagParse(args);
+            fp.CrBool("version", false);
+            var fpgood = fp.Parse();
+            MKL.Version("CLEO - CLEO.cs","19.03.09");
+            MKL.Lic    ("CLEO - CLEO.cs","GNU General Public License 3");
+            Console.WriteLine($"CLEO v{MKL.Newest}");
+            Console.WriteLine("Coded by: Jeroen P. Broks");
+            Console.WriteLine($"(c) Copyright {MKL.CYear(2019)}, Released under the terms of the General Public License v3\n");
+            if (!fpgood) { Console.WriteLine("Invalid cli input!"); return; }
+            if (fp.GetBool("version")) ShowVersionInfo();
+            if (fp.Args.Length == 0) {
+                Console.WriteLine("Usage: CLEO <file to edit>");
+                Console.WriteLine("\tEdits a file");
+                Console.WriteLine("Usage: CLEO -version");
+                Console.WriteLine("\tDetailed version information");
+                return;
+
+            }
+
+        }
     }
 
 }
