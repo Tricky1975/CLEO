@@ -259,3 +259,12 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+
+# I don't need this junk
+License.MKL.gini
+MKL_Backup
+
+# Not that I plan to update this on Mac anymore, but in case I will
+.DS_Store
+._*
