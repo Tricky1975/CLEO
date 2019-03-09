@@ -24,12 +24,6 @@
 // Version: 19.03.09
 // EndLic
 
-
-
-
-
-
-
 using System;
 using System.Collections.Generic;
 using System.IO;
