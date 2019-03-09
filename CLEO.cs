@@ -25,35 +25,21 @@
 // EndLic
 
 using System;
-
 using System.Collections.Generic;
-
 using System.Linq;
-
 using System.Text;
-
 using TrickyUnits;
 
 
 
-namespace CLEO
+namespace CLEO {
 
-{
+    class CLEO{
 
-    class Program
-
-    {
-
-        static void Main(string[] args)
-
-        {
-
+        static void Main(string[] args) {
             MKL.Version("CLEO (Command Line Editor Oversimplefied) - CLEO.cs","19.03.09");
-
             MKL.Lic    ("CLEO (Command Line Editor Oversimplefied) - CLEO.cs","GNU General Public License 3");
-
             Console.WriteLine($"CLEO v{MKL.Newest}");
-
         }
 
     }
