@@ -45,6 +45,7 @@ namespace CLEO {
         readonly string FileName;
         readonly byte[] EOLN; // How to separate EOLNS (if system cannot detect this the Unix way will be default).
         readonly FlagParse flags;
+        int TabSize => flags.GetInt("tabsize");
 
 
         CLEO(string filename,FlagParse aflags) {
@@ -86,6 +87,7 @@ namespace CLEO {
             var fp = new FlagParse(args);
             fp.CrBool("version", false);
             fp.CrBool("wineoln", false); // When set new files will always have the Windows EOLN otherwise EOLN will be set to the unix way.
+            fp.CrInt("tabsize", 8);
             var fpgood = fp.Parse();
             MKL.Version("CLEO - CLEO.cs","19.03.09");
             MKL.Lic    ("CLEO - CLEO.cs","GNU General Public License 3");
@@ -94,6 +96,7 @@ namespace CLEO {
             Console.WriteLine($"(c) Copyright {MKL.CYear(2019)}, Released under the terms of the General Public License v3\n");
             if (!fpgood) { Console.WriteLine("Invalid cli input!"); return; }
             if (fp.GetBool("version")) ShowVersionInfo();
+            if (fp.GetInt("tabsize")<3 || fp.GetInt("tabsize")>12) { Console.WriteLine("TabSize must be between 3 and 12"); return; }
             if (fp.Args.Length == 0) {
                 Console.WriteLine("Usage: CLEO <file to edit>");
                 Console.WriteLine("\tEdits a file");
