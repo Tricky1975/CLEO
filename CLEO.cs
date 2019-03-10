@@ -43,13 +43,17 @@ namespace CLEO {
     class CLEO{
         static CLEO[] CLEOs;
         readonly string FileName;
-        readonly byte[] EOLN; // How to separate EOLNS (if system cannot detect this the Unix way will be default).
+        //readonly byte[] EOLN; // How to separate EOLNS (if system cannot detect this the Unix way will be default).
+        readonly string EOLN;
         readonly FlagParse flags;
         int TabSize => flags.GetInt("tabsize");
         static int docn = 0;
         int curx = 0;
         int cury = 0;
+        int scrx = 0;
+        int scry = 0;
         bool modified = true; // must be false in release!
+        string[] Doc = new string[0];
 
 
         CLEO(string filename,FlagParse aflags) {
@@ -61,15 +65,27 @@ namespace CLEO {
                 if (x.Key==ConsoleKey.Y) {
                     Console.WriteLine("Yes");
                     QuickStream.SaveString(filename, "");
-                    if (flags.GetBool("wineoln")) EOLN = new byte[] { 13, 10 }; else EOLN = new byte[] { 10 };
+                    if (flags.GetBool("wineoln")) EOLN = "\r\n"; else EOLN = "\n";
                 } else {
                     Console.WriteLine("No");
                     Environment.Exit(1);
                 }
             }
+            try {
+                var win = false;
+                var SDoc = QuickStream.LoadLines(FileName,ref win);
+                EOLN = "\n";
+                if (win) EOLN = "\r\n";
+            } catch (Exception e) {
+                Crash(e);
+            }
         }
 
-        static void Locate(int x,int y) { // Named after the "LOCATE" command in GWBASIC,although the original command had syntax LOCATE Y,X but as that would only confuse me... :P
+        static int lx = 0;
+        static int ly = 0;
+        static void Locate(int x,int y, bool force=false) { // Named after the "LOCATE" command in GWBASIC,although the original command had syntax LOCATE Y,X but as that would only confuse me... :P
+            if ((!force) && x == lx && y == ly) return;
+            lx = x; ly = y;
             var rx = x;
             var ry = y;
             if (x < 0) rx = Console.WindowWidth + x;
@@ -112,12 +128,18 @@ namespace CLEO {
             }
         }
 
+        void CursorLocate() => Locate( curx - scrx,(cury-scry)+1);
+        
+        void DrawText() {
+            
+        }
+
         void Redraw() {
             // Clear screen from all junk still living there
             Cls();
 
             // Top and bottom bar!
-            QColor("Head"); for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");  Locate(0, -1);
+            QColor("Head"); for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");  Locate(0, -1,true);
             QColor("Foot"); for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");
 
             // Bar Content
@@ -133,7 +155,7 @@ namespace CLEO {
             // Text Content
 
             // Position Cursor            
-            Console.SetCursorPosition(curx, cury+1);
+            CursorLocate();
             QColor("Text");
         }
 
@@ -143,10 +165,10 @@ namespace CLEO {
 
         static void Quit() {
             foreach (var c in CLEOs) {
-                Locate(0, -1);
+                Locate(0, -1,true);
                 QColor("Quit");
                 for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");
-                Locate(0, -1);
+                Locate(0, -1,true);
                 if (c.modified) {
                     Console.Write($"Save modified file '{c.FileName}' ? <Y/N> ");
                     var waiting = true;
@@ -154,21 +176,22 @@ namespace CLEO {
                         switch (Console.ReadKey(true).Key) {
                             case ConsoleKey.Y:
                                 Console.Write("Yes");
+                                System.Threading.Thread.Sleep(250);
                                 c.Save();
                                 waiting = false;
                                 break;
                             case ConsoleKey.N:
                                 Console.Write("No");
-                                System.Threading.Thread.Sleep(2000);
+                                System.Threading.Thread.Sleep(500);
                                 waiting = false;
                                 break;
                         }
                 }
             }
-            Locate(0, -1);
+            Locate(0, -1,true);
             QColor("Quit");
             for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");
-            Locate(0, -1);
+            Locate(0, -1,true);
             Console.Write("Do you really want to quit CLEO ? <Y/N> ");
             if (Console.ReadKey(true).Key == ConsoleKey.Y) {
                 Console.Write("Yes");
@@ -179,13 +202,33 @@ namespace CLEO {
             }
             CLEOs[docn].Redraw(); // If "no" let's continue like nothing happened ;)
         }
+        
+        static void ShowHelp()
+        {
+            QColor("Text"); Cls();
+            Console.WriteLine("\tCLEO Quick key overview\n");
+            Console.WriteLine("\t\tF1  = Show this help");
+            Console.WriteLine("\t\tF2  = Save");
+            Console.WriteLine("\t\tF6  = Quickly remove a line");
+            Console.WriteLine("\t\tF10 = Quit");
+            Console.WriteLine("\t\tF11 = Prev document");
+            Console.WriteLine("\t\tF12 = Next document");
+            Console.WriteLine("\n\tFor copy and pasting, your normal features your OS provides you inside a terminal should work");
+            Console.WriteLine("\n\tHit any key to go back to your editing");
+            Console.ReadKey();
+            CLEOs[docn].Redraw();
+        }
 
         void Flow() {
             UCaps();
             UpdateCursorPos();
+            CursorLocate();
             if (Console.KeyAvailable) {
                 var k = Console.ReadKey(true);
                 switch (k.Key) {
+                    case ConsoleKey.F1:
+                        ShowHelp();
+                        break;
                     case ConsoleKey.F10:
                         Quit();
                         break;
