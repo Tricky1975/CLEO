@@ -42,6 +42,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\TrickyUnits\Dirry.cs">
+      <Link>dependencies\units\Dirry.cs</Link>
+    </Compile>
     <Compile Include="..\..\TrickyUnits\FlagParse.cs">
       <Link>dependencies\units\FlagParse.cs</Link>
     </Compile>
