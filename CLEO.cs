@@ -29,6 +29,10 @@
 #undef Log
 #undef FlagChat
 
+#if DEBUG
+#define debugdoc
+#endif 
+
 
 using System;
 using System.Collections.Generic;
@@ -73,7 +77,7 @@ namespace CLEO {
             }
             try {
                 var win = false;
-                var SDoc = QuickStream.LoadLines(FileName,ref win);
+                Doc = QuickStream.LoadLines(FileName,ref win);
                 EOLN = "\n";
                 if (win) EOLN = "\r\n";
             } catch (Exception e) {
@@ -97,18 +101,30 @@ namespace CLEO {
         static bool caps = false;
         static bool NumL = false;
         void UCaps(bool force = false) {
-            if (force || caps != Console.CapsLock || NumL!=Console.NumberLock) {
+            if (force || caps != Console.CapsLock || NumL != Console.NumberLock) {
                 caps = Console.CapsLock;
                 NumL = Console.NumberLock;
                 QColor("Foot");
                 Locate(5, -1);
-                switch (caps){
-                    case true:  Console.Write("|CAPS|"); break;
+                switch (caps) {
+                    case true: Console.Write("|CAPS|"); break;
                     case false: Console.Write("|    |"); break;
                 }
                 switch (NumL) {
-                    case true:  Console.Write("|NUM|"); break;
+                    case true: Console.Write("|NUM|"); break;
                     case false: Console.Write("|   |"); break;
+                }
+                Console.Write("  ");
+                switch (EOLN) {
+                    case "\r\n":
+                        Console.Write("Windows");
+                        break;
+                    case "\n":
+                        Console.Write("Unix");
+                        break;
+                    default:
+                        Console.Write("Unknown");
+                        break;
                 }
             }
         }
@@ -130,8 +146,34 @@ namespace CLEO {
 
         void CursorLocate() => Locate( curx - scrx,(cury-scry)+1);
         
+        void DrawLine(int linnum) {
+            // This routine is SLOW! I hope I can produce something faster in the future but for now this'll have to do!
+            var w = Console.WindowWidth - 1;
+            for (int col = scrx; col < scrx + w; col++) {
+                Locate(col - scrx, (linnum - scry) + 1);
+                LOG($"DL {col}/{linnum}/{scrx}/{scry}/{Doc.Length}");
+                if (linnum < Doc.Length && col < Doc[linnum].Length) { // Remember, once the first is true, the second is no longer checked, so this is safe!
+                    var a = Doc[linnum][col];
+                    if (a < 30 || a > 126) {
+                        QColor("Text", true);
+                        Console.Write("?");
+                    } else {
+                        QColor("Text");
+                        Console.Write(a);
+                    }
+                } else if (col == 80) {
+                    QColor("p80l");
+                    Console.Write("|");
+                } else {
+                    QColor("Text");
+                    Console.Write(" ");
+                }
+            }
+        }
+
         void DrawText() {
-            
+            var h = Console.WindowHeight - 2;
+            for (int l = scry; l < scry+h; l++) DrawLine(l);
         }
 
         void Redraw() {
@@ -153,6 +195,7 @@ namespace CLEO {
 
 
             // Text Content
+            DrawText();
 
             // Position Cursor            
             CursorLocate();
@@ -337,11 +380,16 @@ namespace CLEO {
             }
         }
 
-        static void QColor(string n) {
+        static void QColor(string n,bool reverse=false) {
             Assert(config.C($"{n}Color") != "", $"No foreground known for {n}");
             Assert(config.C($"{n}Back")  != "", $"No background known for {n}");
-            Console.ForegroundColor = GQColor(config.C($"{n}Color"));
-            Console.BackgroundColor = GQColor(config.C($"{n}Back"));
+            if (reverse) {
+                Console.BackgroundColor = GQColor(config.C($"{n}Color"));
+                Console.ForegroundColor = GQColor(config.C($"{n}Back"));
+            } else {
+                Console.ForegroundColor = GQColor(config.C($"{n}Color"));
+                Console.BackgroundColor = GQColor(config.C($"{n}Back"));
+            }
         }
 
         static void LoadConfig()
@@ -354,6 +402,8 @@ namespace CLEO {
             config.D("FootBack", "DGreen");
             config.D("QuitColor", "LGreen");
             config.D("QuitBack", "Black");
+            config.D("p80lColor", "DGray");
+            config.D("p80lBack", "Black");
             if (File.Exists(ConfigFile)) {
                 var confl = QuickStream.LoadLines(ConfigFile);
                 if (confl==null) {
@@ -378,7 +428,11 @@ namespace CLEO {
             Console.WriteLine($"PLEASE NOTE! All progress will be logged this time in {Dirry.C("$AppSupport$/ CLEO / CLEO_DEBUG_LOG.TXT")}");
             Console.Beep();
 #endif
+#if debugdoc
+            var fp = new FlagParse(new string[] { "../../test/test.txt" });
+#else
             var fp = new FlagParse(args);
+#endif
             LoadConfig();
             fp.CrBool("version", false);
             fp.CrBool("wineoln", false); // When set new files will always have the Windows EOLN otherwise EOLN will be set to the unix way.
