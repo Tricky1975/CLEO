@@ -11,6 +11,10 @@ I've decided to write my own. As the name suggests, this editor will be oversimp
 Two reasons. Notepad is beyond terrible, and that is actually an insult to all other things that are beyond terrible.
 Second, notepad, opens a window and that is precisely what I do NOT want. Want wanted the editor to live inside the cli window and in there alone! That makes recommendations for better editors like notepad++, or geany or atom etc etc userless! :P
 
+### Why not use VIM?
+
+I hope you're kidding! If not, maybe I can recommend you to find a good psychiatrist since you really need one, or you wouldn't have asked me that question. And that summarizes how I think about VIM!
+
 ### WIP
 
 This is yet a work in progress. I will only release binaries once the tool has been fully set up to work satisfactory.
