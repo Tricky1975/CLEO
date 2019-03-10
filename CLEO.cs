@@ -95,7 +95,7 @@ namespace CLEO {
             var ry = y;
             if (x < 0) rx = Console.WindowWidth + x;
             if (y < 0) ry = Console.WindowHeight + y;
-            LOG($"Locate({x},{y}) => ({rx},{ry})   -- Winsize: {Console.WindowWidth}x{Console.WindowHeight}");
+            //LOG($"Locate({x},{y}) => ({rx},{ry})   -- Winsize: {Console.WindowWidth}x{Console.WindowHeight}");
             Console.SetCursorPosition(rx, ry);
         }
 
@@ -153,27 +153,34 @@ namespace CLEO {
 
         void CursorLocate() => Locate( curx - scrx,(cury-scry)+1);
         
-        void DrawLine(int linnum) {
+        void DrawLine(int linnum,bool force=false) {
             // This routine is SLOW! I hope I can produce something faster in the future but for now this'll have to do!
-            var w = Console.WindowWidth - 1;
-            for (int col = scrx; col < scrx + w; col++) {
-                Locate(col - scrx, (linnum - scry) + 1);
-                LOG($"DL {col}/{linnum}/{scrx}/{scry}/{Doc.Length}");
-                if (linnum < Doc.Length && col < Doc[linnum].Length) { // Remember, once the first is true, the second is no longer checked, so this is safe!
-                    var a = Doc[linnum][col];
-                    if (a < 30 || a > 126) {
-                        QColor("Text", true);
-                        Console.Write("?");
+            if (force || (linnum - scry + 1) < Console.WindowHeight - 2) {
+                var w = Console.WindowWidth - 1;
+                // Auto left-right scroll
+                if (curx<scrx) scrx=scrx-10;
+                if (curx > scrx + w) scrx = curx - 10;
+                if (scrx < 0) scrx = 0;
+                // draw stuff
+                for (int col = scrx; col < scrx + w; col++) {
+                    Locate(col - scrx, (linnum - scry) + 1);
+                    //LOG($"DL {col}/{linnum}/{scrx}/{scry}/{Doc.Length}");
+                    if (linnum < Doc.Length && col < Doc[linnum].Length) { // Remember, once the first is true, the second is no longer checked, so this is safe!
+                        var a = Doc[linnum][col];
+                        if (a < 30 || a > 126) {
+                            QColor("Text", true);
+                            Console.Write("?");
+                        } else {
+                            QColor("Text");
+                            Console.Write(a);
+                        }
+                    } else if (col == 80) {
+                        QColor("p80l");
+                        Console.Write("|");
                     } else {
                         QColor("Text");
-                        Console.Write(a);
+                        Console.Write(" ");
                     }
-                } else if (col == 80) {
-                    QColor("p80l");
-                    Console.Write("|");
-                } else {
-                    QColor("Text");
-                    Console.Write(" ");
                 }
             }
         }
@@ -269,12 +276,78 @@ namespace CLEO {
             CLEOs[docn].Redraw();
         }
 
+        void TypeChar(char ch) {
+            if (cury == Doc.Length)
+                Array.Resize<string>(ref Doc, Doc.Length + 1);
+            if (curx == Doc[cury].Length) {
+                Doc[cury] += ch;
+                curx++;
+                DrawLine(cury);
+            }
+        }
+
+        void BackSpace() {
+            if (curx == 0) {
+                if (cury == 0) return;
+                if (cury == Doc.Length) {
+                    cury--;
+                    Array.Resize(ref Doc, Doc.Length - 1);
+                    CursorLocate();
+                    return;
+                }
+                Doc[cury - 1] += Doc[cury];
+                for(int i = cury + 1; i < Doc.Length-2; i++) {
+                    Doc[i] = Doc[i + 1];
+                    DrawLine(i);
+                    CursorLocate();
+                }
+                Array.Resize(ref Doc, Doc.Length - 1);
+                for (int i = Doc.Length; i < Console.WindowHeight; i++) {
+                    DrawLine(i);
+                }
+                CursorLocate();
+                return;
+            }
+            if (curx == Doc[cury].Length) {
+                Doc[cury] = qstr.Left(Doc[cury], Doc[cury].Length - 1);
+                DrawLine(cury);
+                CursorLocate();
+                curx--;
+                return;
+            }
+            Doc[cury] = $"{qstr.Left(Doc[cury], curx - 1)}{qstr.Right(Doc[cury], Doc[cury].Length - (curx + 1))}";
+            DrawLine(cury);
+            curx--;
+            CursorLocate();
+        }
+
+        void KeyReturn() {
+            if (cury == Doc.Length) {
+                Array.Resize(ref Doc, Doc.Length + 1);
+                Doc[Doc.Length - 1] = "";
+                cury++;
+                CursorLocate();
+                return;
+            }
+            if (curx == Doc[cury].Length) {
+                Array.Resize(ref Doc, Doc.Length + 1);
+                for (int i = Doc.Length - 1; i > cury + 1; i--) Doc[i] = Doc[i - 1];
+                Doc[cury + 1] = "";
+                cury++;
+                curx = 0;
+                DrawText();
+                CursorLocate();
+                return;
+            }
+        }
+
         void Flow() {
             UCaps();
             UpdateCursorPos();
             CursorLocate();
             if (Console.KeyAvailable) {
                 var k = Console.ReadKey(true);
+                LOG($"{k.ToString()} => {k.Key} => {k.KeyChar}");
                 switch (k.Key) {
                     case ConsoleKey.F1:
                         ShowHelp();
@@ -284,6 +357,64 @@ namespace CLEO {
                         break;
                     case ConsoleKey.Insert:
                         insert = !insert;
+                        break;
+                    case ConsoleKey.Q:
+                    case ConsoleKey.W:
+                    case ConsoleKey.E:
+                    case ConsoleKey.R:
+                    case ConsoleKey.T:
+                    case ConsoleKey.Y:
+                    case ConsoleKey.U:
+                    case ConsoleKey.I:
+                    case ConsoleKey.O:
+                    case ConsoleKey.P:
+                    case ConsoleKey.A:
+                    case ConsoleKey.S:
+                    case ConsoleKey.D:
+                    case ConsoleKey.F:
+                    case ConsoleKey.G:
+                    case ConsoleKey.H:
+                    case ConsoleKey.J:
+                    case ConsoleKey.K:
+                    case ConsoleKey.L:
+                    case ConsoleKey.Z:
+                    case ConsoleKey.X:
+                    case ConsoleKey.C:
+                    case ConsoleKey.V:
+                    case ConsoleKey.B:
+                    case ConsoleKey.N:
+                    case ConsoleKey.M:
+                    case ConsoleKey.D0:
+                    case ConsoleKey.D1:
+                    case ConsoleKey.D2:
+                    case ConsoleKey.D3:
+                    case ConsoleKey.D4:
+                    case ConsoleKey.D5:
+                    case ConsoleKey.D6:
+                    case ConsoleKey.D7:
+                    case ConsoleKey.D8:
+                    case ConsoleKey.D9:
+                    case ConsoleKey.Spacebar:
+                    case ConsoleKey.OemComma:
+                    case ConsoleKey.OemPeriod:
+                    case ConsoleKey.OemMinus:
+                    case ConsoleKey.OemPlus:
+                    case ConsoleKey.Oem1:
+                    case ConsoleKey.Oem2:
+                    case ConsoleKey.Oem3:
+                    case ConsoleKey.Oem4:
+                    case ConsoleKey.Oem5:
+                    case ConsoleKey.Oem6:
+                    case ConsoleKey.Oem7:
+                    case ConsoleKey.Oem8:
+                    case ConsoleKey.Separator:
+                        TypeChar(k.KeyChar);
+                        break;
+                    case ConsoleKey.Backspace:
+                        BackSpace();
+                        break;
+                    case ConsoleKey.Enter:
+                        KeyReturn();
                         break;
                 }
             }
