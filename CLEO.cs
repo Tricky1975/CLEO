@@ -29,6 +29,7 @@
 #undef Log
 #undef FlagChat
 
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -45,9 +46,10 @@ namespace CLEO {
         readonly byte[] EOLN; // How to separate EOLNS (if system cannot detect this the Unix way will be default).
         readonly FlagParse flags;
         int TabSize => flags.GetInt("tabsize");
-        int docn = 0;
+        static int docn = 0;
         int curx = 0;
         int cury = 0;
+        bool modified = true; // must be false in release!
 
 
         CLEO(string filename,FlagParse aflags) {
@@ -67,7 +69,7 @@ namespace CLEO {
             }
         }
 
-        void Locate(int x,int y) { // Named after the "LOCATE" command in GWBASIC,although the original command had syntax LOCATE Y,X but as that would only confuse me... :P
+        static void Locate(int x,int y) { // Named after the "LOCATE" command in GWBASIC,although the original command had syntax LOCATE Y,X but as that would only confuse me... :P
             var rx = x;
             var ry = y;
             if (x < 0) rx = Console.WindowWidth + x;
@@ -99,12 +101,12 @@ namespace CLEO {
         // but C# doesn't support that (I tried), so too bad!
         static int ox = 0;
         static int oy = 0;
-        void UpdateCursorPos(bool force) {
+        void UpdateCursorPos(bool force=false) {
             if (force || curx!=ox || cury!=oy) {
                 var spos = $"Doc {docn+1}/{CLEOs.Length} Line {cury + 1} Pos {curx + 1} ";
                 QColor("Foot");
                 Locate(-(spos.Length + 2), -1);
-                Console.WriteLine(spos);
+                Console.Write(spos);
                 ox = curx;
                 oy = cury;
             }
@@ -135,6 +137,61 @@ namespace CLEO {
             QColor("Text");
         }
 
+        void Save() {
+            // Code comes later!
+        }
+
+        static void Quit() {
+            foreach (var c in CLEOs) {
+                Locate(0, -1);
+                QColor("Quit");
+                for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");
+                Locate(0, -1);
+                if (c.modified) {
+                    Console.Write($"Save modified file '{c.FileName}' ? <Y/N> ");
+                    var waiting = true;
+                    while (waiting)
+                        switch (Console.ReadKey(true).Key) {
+                            case ConsoleKey.Y:
+                                Console.Write("Yes");
+                                c.Save();
+                                waiting = false;
+                                break;
+                            case ConsoleKey.N:
+                                Console.Write("No");
+                                System.Threading.Thread.Sleep(2000);
+                                waiting = false;
+                                break;
+                        }
+                }
+            }
+            Locate(0, -1);
+            QColor("Quit");
+            for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");
+            Locate(0, -1);
+            Console.Write("Do you really want to quit CLEO ? <Y/N> ");
+            if (Console.ReadKey(true).Key == ConsoleKey.Y) {
+                Console.Write("Yes");
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.BackgroundColor = ConsoleColor.Black;
+                Cls();
+                Environment.Exit(0);
+            }
+            CLEOs[docn].Redraw(); // If "no" let's continue like nothing happened ;)
+        }
+
+        void Flow() {
+            UCaps();
+            UpdateCursorPos();
+            if (Console.KeyAvailable) {
+                var k = Console.ReadKey(true);
+                switch (k.Key) {
+                    case ConsoleKey.F10:
+                        Quit();
+                        break;
+                }
+            }
+        }
 
 
 
@@ -252,6 +309,8 @@ namespace CLEO {
             config.D("HeadBack", "DGreen");
             config.D("FootColor", "Black");
             config.D("FootBack", "DGreen");
+            config.D("QuitColor", "LGreen");
+            config.D("QuitBack", "Black");
             if (File.Exists(ConfigFile)) {
                 var confl = QuickStream.LoadLines(ConfigFile);
                 if (confl==null) {
@@ -306,6 +365,7 @@ namespace CLEO {
             CLEOs = new CLEO[fp.Args.Length];
             for (int i = 0; i < fp.Args.Length; i++) CLEOs[i] = new CLEO(fp.Args[i],fp);
             CLEOs[0].Redraw(); // Only logic to start with the first document, no?
+            while (true) CLEOs[docn].Flow();
 #if KeyOnExit
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.Black;
