@@ -20,3 +20,4 @@ I hope you're kidding! If not, maybe I can recommend you to find a good psychiat
 This is yet a work in progress. I will only release binaries once the tool has been fully set up to work satisfactory.
 Since this has been written in C# to work on .NET you may be able to use it on Mac and Linux as well when you have Mono installed. ;)
 
+![](https://i.imgur.com/fw33lG4.png)
