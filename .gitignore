@@ -264,6 +264,7 @@ __pycache__/
 # I don't need this junk
 License.MKL.gini
 MKL_Backup
+test
 
 # Not that I plan to update this on Mac anymore, but in case I will
 .DS_Store
