@@ -56,6 +56,7 @@ namespace CLEO {
         int cury = 0;
         int scrx = 0;
         int scry = 0;
+        bool insert = true;
         bool modified = true; // must be false in release!
         string[] Doc = new string[0];
 
@@ -100,10 +101,12 @@ namespace CLEO {
 
         static bool caps = false;
         static bool NumL = false;
+        static bool sins = false;
         void UCaps(bool force = false) {
-            if (force || caps != Console.CapsLock || NumL != Console.NumberLock) {
+            if (force || caps != Console.CapsLock || NumL != Console.NumberLock || sins!=insert) {
                 caps = Console.CapsLock;
                 NumL = Console.NumberLock;
+                sins = insert;
                 QColor("Foot");
                 Locate(5, -1);
                 switch (caps) {
@@ -113,6 +116,10 @@ namespace CLEO {
                 switch (NumL) {
                     case true: Console.Write("|NUM|"); break;
                     case false: Console.Write("|   |"); break;
+                }
+                switch (insert) {
+                    case true: Console.Write( "|INSERT|"); break;
+                    case false: Console.Write("|      |"); break;
                 }
                 Console.Write("  ");
                 switch (EOLN) {
@@ -274,6 +281,9 @@ namespace CLEO {
                         break;
                     case ConsoleKey.F10:
                         Quit();
+                        break;
+                    case ConsoleKey.Insert:
+                        insert = !insert;
                         break;
                 }
             }
