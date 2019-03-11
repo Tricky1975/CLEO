@@ -383,6 +383,7 @@ namespace CLEO
                     CursorLocate();
                     return;
                 }
+                var ol = Doc[cury].Length;
                 Doc[cury - 1] += Doc[cury];
                 for (int i = cury; i < Doc.Length - 2; i++) {
                     Doc[i] = Doc[i + 1];
@@ -397,7 +398,8 @@ namespace CLEO
                 }
                 */
                 cury--;
-                if (cury < Doc.Length) curx = Doc[cury].Length;
+                if (cury < Doc.Length) curx = Doc[cury].Length-ol;
+                if (curx < 0) curx = 0; // Safety measure. curx<0 should NEVER be possible but if it happens, no crash will happen and CLEO will "fix itself".
                 CursorLocate();
                 return;
             }
