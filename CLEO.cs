@@ -321,7 +321,7 @@ namespace CLEO {
                 curx--;
                 return;
             }
-            Doc[cury] = $"{qstr.Left(Doc[cury], curx - 1)}{qstr.Right(Doc[cury], Doc[cury].Length - (curx + 1))}";
+            Doc[cury] = $"{qstr.Left(Doc[cury], curx - 1)}{qstr.Right(Doc[cury], Doc[cury].Length - (curx ))}";
             DrawLine(cury);
             curx--;
             CursorLocate();
