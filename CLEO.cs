@@ -210,6 +210,8 @@ namespace CLEO
         void Redraw()
         {
             // Clear screen from all junk still living there
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.Black;
             Cls();
 
             // Top and bottom bar!
@@ -234,9 +236,32 @@ namespace CLEO
             QColor("Text");
         }
 
+        static void FootMessage(string m) {
+            QColor("FOOT");
+            Locate(0, -1);
+            for (int i = 0; i < Console.WindowWidth - 2; ++i) Console.Write(" ");
+            Locate(0, -1,true);
+            Console.Write(m);
+        }
+
         void Save()
         {
-            // Code comes later!
+            try {
+                var bout = QuickStream.WriteFile(FileName);
+                FootMessage($"Saving {FileName}");
+                for(int i = 0; i < Doc.Length; i++) {
+                    if (i > 0) bout.WriteString(EOLN, true);
+                    bout.WriteString(Doc[i],true);
+                }
+                bout.Close();
+                modified = false;
+            } catch (Exception e) {
+                FootMessage($"ERROR! Saving failed -- {e.Message}");
+                Console.Beep();
+                Console.ReadKey();
+            } finally {
+                Redraw();
+            }
         }
 
         static void Quit()
@@ -403,6 +428,9 @@ namespace CLEO
                 switch (k.Key) {
                     case ConsoleKey.F1:
                         ShowHelp();
+                        break;
+                    case ConsoleKey.F2:
+                        Save();
                         break;
                     case ConsoleKey.F10:
                         Quit();
@@ -575,6 +603,7 @@ namespace CLEO
                 case "LRed":
                 case "Red":
                 case "LightRed":
+                case "Pink":
                     return ConsoleColor.Red;
                 case "LMagenta":
                 case "Magenta":
