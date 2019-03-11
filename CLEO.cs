@@ -21,8 +21,9 @@
 // Please note that some references to data like pictures or audio, do not automatically
 // fall under this licenses. Mostly this is noted in the respective files.
 // 
-// Version: 19.03.09
+// Version: 19.03.11
 // EndLic
+
 
 #undef KeyOnExit
 #define ColorStrict  // if set the program will crash when an unknown color has been set!
@@ -42,9 +43,11 @@ using TrickyUnits;
 
 
 
-namespace CLEO {
+namespace CLEO
+{
 
-    class CLEO{
+    class CLEO
+    {
         static CLEO[] CLEOs;
         readonly string FileName;
         //readonly byte[] EOLN; // How to separate EOLNS (if system cannot detect this the Unix way will be default).
@@ -61,13 +64,14 @@ namespace CLEO {
         string[] Doc = new string[0];
 
 
-        CLEO(string filename,FlagParse aflags) {
+        CLEO(string filename, FlagParse aflags)
+        {
             FileName = filename;
             flags = aflags;
             if (!File.Exists(FileName)) {
                 Console.Write($"File {FileName} does not exist. Create it ? <Y/N> ");
                 var x = Console.ReadKey(true);
-                if (x.Key==ConsoleKey.Y) {
+                if (x.Key == ConsoleKey.Y) {
                     Console.WriteLine("Yes");
                     QuickStream.SaveString(filename, "");
                     if (flags.GetBool("wineoln")) EOLN = "\r\n"; else EOLN = "\n";
@@ -78,7 +82,7 @@ namespace CLEO {
             }
             try {
                 var win = false;
-                Doc = QuickStream.LoadLines(FileName,ref win);
+                Doc = QuickStream.LoadLines(FileName, ref win);
                 EOLN = "\n";
                 if (win) EOLN = "\r\n";
             } catch (Exception e) {
@@ -88,7 +92,8 @@ namespace CLEO {
 
         static int lx = 0;
         static int ly = 0;
-        static void Locate(int x,int y, bool force=false) { // Named after the "LOCATE" command in GWBASIC,although the original command had syntax LOCATE Y,X but as that would only confuse me... :P
+        static void Locate(int x, int y, bool force = false)
+        { // Named after the "LOCATE" command in GWBASIC,although the original command had syntax LOCATE Y,X but as that would only confuse me... :P
             if ((!force) && x == lx && y == ly) return;
             lx = x; ly = y;
             var rx = x;
@@ -102,13 +107,20 @@ namespace CLEO {
         static bool caps = false;
         static bool NumL = false;
         static bool sins = false;
-        void UCaps(bool force = false) {
-            if (force || caps != Console.CapsLock || NumL != Console.NumberLock || sins!=insert) {
+        static bool smod = false;
+        void UCaps(bool force = false)
+        {
+            if (force || caps != Console.CapsLock || NumL != Console.NumberLock || sins != insert || smod != modified) {
                 caps = Console.CapsLock;
                 NumL = Console.NumberLock;
                 sins = insert;
+                smod = modified;
                 QColor("Foot");
-                Locate(5, -1);
+                Locate(0, -1);
+                if (modified)
+                    Console.Write("  *  ");
+                else
+                    Console.Write("     ");
                 switch (caps) {
                     case true: Console.Write("|CAPS|"); break;
                     case false: Console.Write("|    |"); break;
@@ -118,7 +130,7 @@ namespace CLEO {
                     case false: Console.Write("|   |"); break;
                 }
                 switch (insert) {
-                    case true: Console.Write( "|INSERT|"); break;
+                    case true: Console.Write("|INSERT|"); break;
                     case false: Console.Write("|      |"); break;
                 }
                 Console.Write("  ");
@@ -140,10 +152,11 @@ namespace CLEO {
         // but C# doesn't support that (I tried), so too bad!
         static int ox = 0;
         static int oy = 0;
-        void UpdateCursorPos(bool force=false) {
-            if (force || curx!=ox || cury!=oy) {
-                var ll = "*"; if (cury < Doc.Length) ll = $"{Doc[cury].Length+1}";
-                var spos = $"    Doc {docn+1}/{CLEOs.Length} Line {cury + 1}/{Doc.Length} Pos {curx + 1}/{ll} ";
+        void UpdateCursorPos(bool force = false)
+        {
+            if (force || curx != ox || cury != oy) {
+                var ll = "*"; if (cury < Doc.Length) ll = $"{Doc[cury].Length + 1}";
+                var spos = $"    Doc {docn + 1}/{CLEOs.Length} Line {cury + 1}/{Doc.Length} Pos {curx + 1}/{ll} ";
                 QColor("Foot");
                 Locate(-(spos.Length + 2), -1);
                 Console.Write(spos);
@@ -152,14 +165,15 @@ namespace CLEO {
             }
         }
 
-        void CursorLocate() => Locate( curx - scrx,(cury-scry)+1);
-        
-        void DrawLine(int linnum,bool force=false) {
+        void CursorLocate() => Locate(curx - scrx, (cury - scry) + 1);
+
+        void DrawLine(int linnum, bool force = false)
+        {
             // This routine is SLOW! I hope I can produce something faster in the future but for now this'll have to do!
             if (force || (linnum - scry + 1) < Console.WindowHeight - 2) {
                 var w = Console.WindowWidth - 1;
                 // Auto left-right scroll
-                if (curx<scrx) scrx=scrx-10;
+                if (curx < scrx) scrx = scrx - 10;
                 if (curx > scrx + w) scrx = curx - 10;
                 if (scrx < 0) scrx = 0;
                 // draw stuff
@@ -186,17 +200,19 @@ namespace CLEO {
             }
         }
 
-        void DrawText() {
+        void DrawText()
+        {
             var h = Console.WindowHeight - 2;
-            for (int l = scry; l < scry+h; l++) DrawLine(l);
+            for (int l = scry; l < scry + h; l++) DrawLine(l);
         }
 
-        void Redraw() {
+        void Redraw()
+        {
             // Clear screen from all junk still living there
             Cls();
 
             // Top and bottom bar!
-            QColor("Head"); for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");  Locate(0, -1,true);
+            QColor("Head"); for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" "); Locate(0, -1, true);
             QColor("Foot"); for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");
 
             // Bar Content
@@ -217,16 +233,18 @@ namespace CLEO {
             QColor("Text");
         }
 
-        void Save() {
+        void Save()
+        {
             // Code comes later!
         }
 
-        static void Quit() {
+        static void Quit()
+        {
             foreach (var c in CLEOs) {
-                Locate(0, -1,true);
+                Locate(0, -1, true);
                 QColor("Quit");
                 for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");
-                Locate(0, -1,true);
+                Locate(0, -1, true);
                 if (c.modified) {
                     Console.Write($"Save modified file '{c.FileName}' ? <Y/N> ");
                     var waiting = true;
@@ -246,10 +264,10 @@ namespace CLEO {
                         }
                 }
             }
-            Locate(0, -1,true);
+            Locate(0, -1, true);
             QColor("Quit");
             for (int i = 0; i < Console.WindowWidth - 1; i++) Console.Write(" ");
-            Locate(0, -1,true);
+            Locate(0, -1, true);
             Console.Write("Do you really want to quit CLEO ? <Y/N> ");
             if (Console.ReadKey(true).Key == ConsoleKey.Y) {
                 Console.Write("Yes");
@@ -260,7 +278,7 @@ namespace CLEO {
             }
             CLEOs[docn].Redraw(); // If "no" let's continue like nothing happened ;)
         }
-        
+
         static void ShowHelp()
         {
             QColor("Text"); Cls();
@@ -277,7 +295,9 @@ namespace CLEO {
             CLEOs[docn].Redraw();
         }
 
-        void TypeChar(char ch) {
+        void TypeChar(char ch)
+        {
+            modified = true;
             if (cury == Doc.Length) {
                 Array.Resize<string>(ref Doc, Doc.Length + 1);
                 Doc[cury] = "";
@@ -289,9 +309,11 @@ namespace CLEO {
             }
         }
 
-        void BackSpace() {
+        void BackSpace()
+        {
             if (curx == 0) {
                 if (cury == 0) return;
+                modified = true;
                 if (cury == Doc.Length) {
                     cury--;
                     //Array.Resize(ref Doc, Doc.Length - 1);
@@ -300,7 +322,7 @@ namespace CLEO {
                     return;
                 }
                 Doc[cury - 1] += Doc[cury];
-                for(int i = cury + 1; i < Doc.Length-2; i++) {
+                for (int i = cury + 1; i < Doc.Length - 2; i++) {
                     Doc[i] = Doc[i + 1];
                     DrawLine(i);
                     CursorLocate();
@@ -321,13 +343,15 @@ namespace CLEO {
                 curx--;
                 return;
             }
-            Doc[cury] = $"{qstr.Left(Doc[cury], curx - 1)}{qstr.Right(Doc[cury], Doc[cury].Length - (curx ))}";
+            Doc[cury] = $"{qstr.Left(Doc[cury], curx - 1)}{qstr.Right(Doc[cury], Doc[cury].Length - (curx))}";
             DrawLine(cury);
             curx--;
             CursorLocate();
         }
 
-        void KeyReturn() {
+        void KeyReturn()
+        {
+            modified = true;
             if (cury == Doc.Length) {
                 Array.Resize(ref Doc, Doc.Length + 1);
                 Doc[Doc.Length - 1] = "";
@@ -347,16 +371,18 @@ namespace CLEO {
             }
         }
 
-        void LeftArrow() {
+        void LeftArrow()
+        {
             if (curx == 0) {
                 if (cury == 0) return;
                 cury--;
                 curx = Doc[cury].Length;
-            } else curx--;            
+            } else curx--;
             CursorLocate();
         }
 
-        void RightArrow() {
+        void RightArrow()
+        {
             if (cury == Doc.Length) return;
             if (curx == Doc[cury].Length) {
                 curx = 0;
@@ -365,7 +391,8 @@ namespace CLEO {
             CursorLocate();
         }
 
-        void Flow() {
+        void Flow()
+        {
             UCaps();
             UpdateCursorPos();
             CursorLocate();
@@ -483,7 +510,8 @@ namespace CLEO {
         static TGINI config = new TGINI();
         static void Cls() => Console.Clear();
 
-        static void Crash(string e) {
+        static void Crash(string e)
+        {
             Cls();
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine("FATAL ERROR!");
@@ -493,12 +521,14 @@ namespace CLEO {
         }
         static void Crash(Exception e) => Crash(e.Message);
 
-        static void Assert(bool cond,string e) {
+        static void Assert(bool cond, string e)
+        {
             if (!cond) Crash(e);
         }
-        
-        
-        static void ShowVersionInfo() {
+
+
+        static void ShowVersionInfo()
+        {
             Console.WriteLine(MKL.All(true));
         }
 
@@ -567,9 +597,10 @@ namespace CLEO {
             }
         }
 
-        static void QColor(string n,bool reverse=false) {
+        static void QColor(string n, bool reverse = false)
+        {
             Assert(config.C($"{n}Color") != "", $"No foreground known for {n}");
-            Assert(config.C($"{n}Back")  != "", $"No background known for {n}");
+            Assert(config.C($"{n}Back") != "", $"No background known for {n}");
             if (reverse) {
                 Console.BackgroundColor = GQColor(config.C($"{n}Color"));
                 Console.ForegroundColor = GQColor(config.C($"{n}Back"));
@@ -593,7 +624,7 @@ namespace CLEO {
             config.D("p80lBack", "Black");
             if (File.Exists(ConfigFile)) {
                 var confl = QuickStream.LoadLines(ConfigFile);
-                if (confl==null) {
+                if (confl == null) {
                     Crash("Invalid config file");
                 }
                 config.ParseLines(confl);
@@ -603,13 +634,15 @@ namespace CLEO {
 #if Log
         static QuickStream btlog = QuickStream.WriteFile(Dirry.C("$AppSupport$/CLEO/CLEO_DEBUG_LOG.TXT"));
 #endif
-        static void LOG(string l) {
+        static void LOG(string l)
+        {
 #if Log
             btlog.WriteString($"{DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}\t {l}\n", true);
 #endif
         }
 
-        static void Main(string[] args) {
+        static void Main(string[] args)
+        {
             LOG("Session Started! Log Created");
 #if Log
             Console.WriteLine($"PLEASE NOTE! All progress will be logged this time in {Dirry.C("$AppSupport$/ CLEO / CLEO_DEBUG_LOG.TXT")}");
@@ -632,20 +665,20 @@ namespace CLEO {
 #else
             var fpgood = fp.Parse();
 #endif
-            MKL.Version("CLEO - CLEO.cs","19.03.09");
-            MKL.Lic    ("CLEO - CLEO.cs","GNU General Public License 3");
+            MKL.Version("CLEO - CLEO.cs", "19.03.09");
+            MKL.Lic("CLEO - CLEO.cs", "GNU General Public License 3");
             Console.WriteLine($"CLEO v{MKL.Newest}");
             Console.WriteLine("Coded by: Jeroen P. Broks");
             Console.WriteLine($"(c) Copyright {MKL.CYear(2019)}, Released under the terms of the General Public License v3\n");
             if (!fpgood) { Console.WriteLine("Invalid cli input!"); return; }
             if (fp.GetBool("version")) ShowVersionInfo();
-            if (fp.GetInt("tabsize")<3 || fp.GetInt("tabsize")>12) { Console.WriteLine("TabSize must be between 3 and 12"); return; }
+            if (fp.GetInt("tabsize") < 3 || fp.GetInt("tabsize") > 12) { Console.WriteLine("TabSize must be between 3 and 12"); return; }
             if (fp.GetBool("configure")) {
                 if (!File.Exists(ConfigFile)) {
                     Directory.CreateDirectory(qstr.ExtractDir(ConfigFile));
                     config.SaveSource(ConfigFile);
                 }
-                CLEOs = new CLEO[] { new CLEO(ConfigFile.Replace("\\","/"), fp) };
+                CLEOs = new CLEO[] { new CLEO(ConfigFile.Replace("\\", "/"), fp) };
             } else {
                 if (fp.Args.Length == 0) {
                     Console.WriteLine("Usage: CLEO <file to edit>");
