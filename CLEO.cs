@@ -294,7 +294,8 @@ namespace CLEO {
                 if (cury == 0) return;
                 if (cury == Doc.Length) {
                     cury--;
-                    Array.Resize(ref Doc, Doc.Length - 1);
+                    //Array.Resize(ref Doc, Doc.Length - 1);
+                    curx = Doc[cury].Length;
                     CursorLocate();
                     return;
                 }
