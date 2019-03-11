@@ -321,7 +321,7 @@ namespace CLEO
                 Console.Write("Yes");
                 Console.ForegroundColor = ConsoleColor.Gray;
                 Console.BackgroundColor = ConsoleColor.Black;
-                Cls();
+                Console.Clear();
                 Environment.Exit(0);
             }
             CLEOs[docn].Redraw(); // If "no" let's continue like nothing happened ;)
@@ -334,9 +334,9 @@ namespace CLEO
             Console.WriteLine("\t\tF1  = Show this help");
             Console.WriteLine("\t\tF2  = Save");
             Console.WriteLine("\t\tF6  = Quickly remove a line");
+            Console.WriteLine("\t\tF8  = Prev document");
+            Console.WriteLine("\t\tF9  = Next document");
             Console.WriteLine("\t\tF10 = Quit");
-            Console.WriteLine("\t\tF11 = Prev document");
-            Console.WriteLine("\t\tF12 = Next document");
             Console.WriteLine("\n\tFor copy and pasting, your normal features your OS provides you inside a terminal should work");
             Console.WriteLine("\n\tHit any key to go back to your editing");
             Console.ReadKey();
@@ -508,6 +508,16 @@ namespace CLEO
                     case ConsoleKey.F6:
                         DelLine();
                         break;
+                    case ConsoleKey.F8:
+                        docn--;
+                        if (docn < 0) docn = CLEOs.Length - 1;
+                        CLEOs[docn].Redraw();
+                        return;
+                    case ConsoleKey.F9:
+                        docn++;
+                        if (docn >= CLEOs.Length) docn = 0;
+                        CLEOs[docn].Redraw();
+                        return;
                     case ConsoleKey.Q:
                     case ConsoleKey.W:
                     case ConsoleKey.E:
@@ -607,7 +617,11 @@ namespace CLEO
 
         static string ConfigFile => Dirry.C("$AppSupport$/CLEO/Config.gini");
         static TGINI config = new TGINI();
-        static void Cls() => Console.Clear();
+        static void Cls() {
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Clear();
+        }
 
         static void Crash(string e)
         {
