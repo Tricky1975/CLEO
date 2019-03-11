@@ -613,6 +613,7 @@ namespace CLEO {
             LoadConfig();
             fp.CrBool("version", false);
             fp.CrBool("wineoln", false); // When set new files will always have the Windows EOLN otherwise EOLN will be set to the unix way.
+            fp.CrBool("configure", false);
             fp.CrInt("tabsize", 8);
 #if FlagChat
             Console.WriteLine("Parsing cli input");
@@ -629,15 +630,23 @@ namespace CLEO {
             if (!fpgood) { Console.WriteLine("Invalid cli input!"); return; }
             if (fp.GetBool("version")) ShowVersionInfo();
             if (fp.GetInt("tabsize")<3 || fp.GetInt("tabsize")>12) { Console.WriteLine("TabSize must be between 3 and 12"); return; }
-            if (fp.Args.Length == 0) {
-                Console.WriteLine("Usage: CLEO <file to edit>");
-                Console.WriteLine("\tEdits a file");
-                Console.WriteLine("Usage: CLEO -version");
-                Console.WriteLine("\tDetailed version information");
-                return;
+            if (fp.GetBool("configure")) {
+                if (!File.Exists(ConfigFile)) {
+                    Directory.CreateDirectory(qstr.ExtractDir(ConfigFile));
+                    config.SaveSource(ConfigFile);
+                }
+                CLEOs = new CLEO[] { new CLEO(ConfigFile.Replace("\\","/"), fp) };
+            } else {
+                if (fp.Args.Length == 0) {
+                    Console.WriteLine("Usage: CLEO <file to edit>");
+                    Console.WriteLine("\tEdits a file");
+                    Console.WriteLine("Usage: CLEO -version");
+                    Console.WriteLine("\tDetailed version information");
+                    return;
+                }
+                CLEOs = new CLEO[fp.Args.Length];
+                for (int i = 0; i < fp.Args.Length; i++) CLEOs[i] = new CLEO(fp.Args[i], fp);
             }
-            CLEOs = new CLEO[fp.Args.Length];
-            for (int i = 0; i < fp.Args.Length; i++) CLEOs[i] = new CLEO(fp.Args[i],fp);
             CLEOs[0].Redraw(); // Only logic to start with the first document, no?
             while (true) CLEOs[docn].Flow();
 #if KeyOnExit
