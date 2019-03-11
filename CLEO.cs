@@ -142,7 +142,7 @@ namespace CLEO {
         static int oy = 0;
         void UpdateCursorPos(bool force=false) {
             if (force || curx!=ox || cury!=oy) {
-                var spos = $"Doc {docn+1}/{CLEOs.Length} Line {cury + 1} Pos {curx + 1} ";
+                var spos = $"    Doc {docn+1}/{CLEOs.Length} Line {cury + 1} Pos {curx + 1} ";
                 QColor("Foot");
                 Locate(-(spos.Length + 2), -1);
                 Console.Write(spos);
@@ -305,6 +305,8 @@ namespace CLEO {
                 for (int i = Doc.Length; i < Console.WindowHeight; i++) {
                     DrawLine(i);
                 }
+                cury--;
+                if (cury < Doc.Length) curx = Doc[cury].Length;
                 CursorLocate();
                 return;
             }
@@ -415,6 +417,12 @@ namespace CLEO {
                         break;
                     case ConsoleKey.Enter:
                         KeyReturn();
+                        break;
+                    case ConsoleKey.Home:
+                        curx = 0;
+                        break;
+                    case ConsoleKey.End:
+                        if (cury < Doc.Length) curx = Doc[cury].Length;
                         break;
                 }
             }
