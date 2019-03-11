@@ -332,6 +332,14 @@ namespace CLEO
                 Doc[cury] += ch;
                 curx++;
                 DrawLine(cury);
+            } else if (curx == 0) {
+                Doc[cury] = $"{ch}{Doc[cury]}";
+                curx++;
+                DrawLine(cury);
+            } else if (curx > 0) {
+                Doc[cury] = $"{qstr.Left(Doc[cury], curx)}{ch}{qstr.Right(Doc[cury],Doc[cury].Length-curx)}";
+                curx++;
+                DrawLine(cury);
             }
         }
 
