@@ -352,6 +352,7 @@ namespace CLEO
                     cury--;
                     //Array.Resize(ref Doc, Doc.Length - 1);
                     curx = Doc[cury].Length;
+                    DrawText();
                     CursorLocate();
                     return;
                 }
@@ -359,6 +360,7 @@ namespace CLEO
                 for (int i = cury + 1; i < Doc.Length - 2; i++) {
                     Doc[i] = Doc[i + 1];
                     DrawLine(i);
+                    DrawText();
                     CursorLocate();
                 }
                 Array.Resize(ref Doc, Doc.Length - 1);
