@@ -25,6 +25,7 @@
 // EndLic
 
 
+
 #undef KeyOnExit
 #define ColorStrict  // if set the program will crash when an unknown color has been set!
 #undef Log
@@ -665,8 +666,8 @@ namespace CLEO
 #else
             var fpgood = fp.Parse();
 #endif
-            MKL.Version("CLEO - CLEO.cs", "19.03.09");
-            MKL.Lic("CLEO - CLEO.cs", "GNU General Public License 3");
+            MKL.Version("CLEO - CLEO.cs","19.03.11");
+            MKL.Lic    ("CLEO - CLEO.cs","GNU General Public License 3");
             Console.WriteLine($"CLEO v{MKL.Newest}");
             Console.WriteLine("Coded by: Jeroen P. Broks");
             Console.WriteLine($"(c) Copyright {MKL.CYear(2019)}, Released under the terms of the General Public License v3\n");
