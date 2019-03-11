@@ -57,7 +57,7 @@ namespace CLEO {
         int scrx = 0;
         int scry = 0;
         bool insert = true;
-        bool modified = true; // must be false in release!
+        bool modified = false; // must be false in release!
         string[] Doc = new string[0];
 
 
@@ -451,6 +451,16 @@ namespace CLEO {
                         break;
                     case ConsoleKey.RightArrow:
                         RightArrow();
+                        break;
+                    case ConsoleKey.UpArrow:
+                        if (cury > 0) cury--;
+                        if (curx > Doc[cury].Length) curx = Doc[cury].Length;
+                        CursorLocate();
+                        break;
+                    case ConsoleKey.DownArrow:
+                        if (cury < Doc.Length) cury++;
+                        if (cury == Doc.Length) curx = 0;
+                        else if (curx > Doc[cury].Length) curx = Doc[cury].Length;
                         break;
                 }
             }
