@@ -26,6 +26,7 @@
 
 
 
+
 #undef KeyOnExit
 #define ColorStrict  // if set the program will crash when an unknown color has been set!
 #undef Log
@@ -237,30 +238,51 @@ namespace CLEO
         }
 
         static void FootMessage(string m) {
+
             QColor("FOOT");
+
             Locate(0, -1);
+
             for (int i = 0; i < Console.WindowWidth - 2; ++i) Console.Write(" ");
+
             Locate(0, -1,true);
+
             Console.Write(m);
+
         }
 
         void Save()
         {
             try {
+
                 var bout = QuickStream.WriteFile(FileName);
+
                 FootMessage($"Saving {FileName}");
+
                 for(int i = 0; i < Doc.Length; i++) {
+
                     if (i > 0) bout.WriteString(EOLN, true);
+
                     bout.WriteString(Doc[i],true);
+
                 }
+
                 bout.Close();
+
                 modified = false;
+
             } catch (Exception e) {
+
                 FootMessage($"ERROR! Saving failed -- {e.Message}");
+
                 Console.Beep();
+
                 Console.ReadKey();
+
             } finally {
+
                 Redraw();
+
             }
         }
 
@@ -333,12 +355,17 @@ namespace CLEO
                 curx++;
                 DrawLine(cury);
             } else if (curx == 0) {
+
                 Doc[cury] = $"{ch}{Doc[cury]}";
                 curx++;
+
                 DrawLine(cury);
             } else if (curx > 0) {
+
                 Doc[cury] = $"{qstr.Left(Doc[cury], curx)}{ch}{qstr.Right(Doc[cury],Doc[cury].Length-curx)}";
+
                 curx++;
+
                 DrawLine(cury);
             }
         }
@@ -357,16 +384,18 @@ namespace CLEO
                     return;
                 }
                 Doc[cury - 1] += Doc[cury];
-                for (int i = cury + 1; i < Doc.Length - 2; i++) {
+                for (int i = cury; i < Doc.Length - 2; i++) {
                     Doc[i] = Doc[i + 1];
-                    DrawLine(i);
-                    DrawText();
-                    CursorLocate();
                 }
                 Array.Resize(ref Doc, Doc.Length - 1);
+                //DrawLine(i);
+                DrawText();
+                CursorLocate();
+                /*
                 for (int i = Doc.Length; i < Console.WindowHeight; i++) {
                     DrawLine(i);
                 }
+                */
                 cury--;
                 if (cury < Doc.Length) curx = Doc[cury].Length;
                 CursorLocate();
@@ -405,14 +434,22 @@ namespace CLEO
                 CursorLocate();
                 return;
             }
+
             Array.Resize(ref Doc, Doc.Length + 1);
+
             for (int i = Doc.Length - 1; i > cury + 1; i--) Doc[i] = Doc[i - 1];
+
             Doc[cury + 1] = qstr.Right(Doc[cury], Doc[cury].Length - curx);
+
             Doc[cury] = qstr.Left(Doc[cury], curx);
+
             cury++;
+
             curx = 0;
+
             DrawText();
             CursorLocate();
+
         }
 
         void LeftArrow()
@@ -447,6 +484,7 @@ namespace CLEO
                     case ConsoleKey.F1:
                         ShowHelp();
                         break;
+
                     case ConsoleKey.F2:
                         Save();
                         break;
@@ -621,6 +659,7 @@ namespace CLEO
                 case "LRed":
                 case "Red":
                 case "LightRed":
+
                 case "Pink":
                     return ConsoleColor.Red;
                 case "LMagenta":
