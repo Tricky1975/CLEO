@@ -142,7 +142,8 @@ namespace CLEO {
         static int oy = 0;
         void UpdateCursorPos(bool force=false) {
             if (force || curx!=ox || cury!=oy) {
-                var spos = $"    Doc {docn+1}/{CLEOs.Length} Line {cury + 1} Pos {curx + 1} ";
+                var ll = "*"; if (cury < Doc.Length) ll = $"{Doc[cury].Length+1}";
+                var spos = $"    Doc {docn+1}/{CLEOs.Length} Line {cury + 1}/{Doc.Length} Pos {curx + 1}/{ll} ";
                 QColor("Foot");
                 Locate(-(spos.Length + 2), -1);
                 Console.Write(spos);
@@ -277,8 +278,10 @@ namespace CLEO {
         }
 
         void TypeChar(char ch) {
-            if (cury == Doc.Length)
+            if (cury == Doc.Length) {
                 Array.Resize<string>(ref Doc, Doc.Length + 1);
+                Doc[cury] = "";
+            }
             if (curx == Doc[cury].Length) {
                 Doc[cury] += ch;
                 curx++;
