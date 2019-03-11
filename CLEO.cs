@@ -343,6 +343,24 @@ namespace CLEO {
             }
         }
 
+        void LeftArrow() {
+            if (curx == 0) {
+                if (cury == 0) return;
+                cury--;
+                curx = Doc[cury].Length;
+            } else curx--;            
+            CursorLocate();
+        }
+
+        void RightArrow() {
+            if (cury == Doc.Length) return;
+            if (curx == Doc[cury].Length) {
+                curx = 0;
+                cury++;
+            } else curx++;
+            CursorLocate();
+        }
+
         void Flow() {
             UCaps();
             UpdateCursorPos();
@@ -423,6 +441,12 @@ namespace CLEO {
                         break;
                     case ConsoleKey.End:
                         if (cury < Doc.Length) curx = Doc[cury].Length;
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        LeftArrow();
+                        break;
+                    case ConsoleKey.RightArrow:
+                        RightArrow();
                         break;
                 }
             }
