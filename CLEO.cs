@@ -474,6 +474,15 @@ namespace CLEO
             CursorLocate();
         }
 
+        void DelLine() {
+            if (cury == Doc.Length) return;
+            for (int l = cury; l < Doc.Length - 1; l++) Doc[l] = Doc[l + 1];
+            Array.Resize(ref Doc, Doc.Length - 1);
+            curx = 0;
+            DrawText();
+            modified = true;
+        }
+
         void Flow()
         {
             UCaps();
@@ -495,6 +504,9 @@ namespace CLEO
                         break;
                     case ConsoleKey.Insert:
                         insert = !insert;
+                        break;
+                    case ConsoleKey.F6:
+                        DelLine();
                         break;
                     case ConsoleKey.Q:
                     case ConsoleKey.W:
