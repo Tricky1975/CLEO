@@ -403,6 +403,14 @@ namespace CLEO
                 CursorLocate();
                 return;
             }
+            Array.Resize(ref Doc, Doc.Length + 1);
+            for (int i = Doc.Length - 1; i > cury + 1; i--) Doc[i] = Doc[i - 1];
+            Doc[cury + 1] = qstr.Right(Doc[cury], Doc[cury].Length - curx);
+            Doc[cury] = qstr.Left(Doc[cury], curx);
+            cury++;
+            curx = 0;
+            DrawText();
+            CursorLocate();
         }
 
         void LeftArrow()
