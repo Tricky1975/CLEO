@@ -342,8 +342,10 @@ namespace CLEO
 
                 DrawLine(cury);
             } else if (curx > 0) {
-
-                Doc[cury] = $"{qstr.Left(Doc[cury], curx)}{ch}{qstr.Right(Doc[cury],Doc[cury].Length-curx)}";
+                if (insert)
+                    Doc[cury] = $"{qstr.Left(Doc[cury], curx)}{ch}{qstr.Right(Doc[cury], Doc[cury].Length - curx)}";
+                else
+                    Doc[cury] = $"{qstr.Left(Doc[cury], curx)}{ch}{qstr.Right(Doc[cury], Doc[cury].Length - (curx+1))}";
 
                 curx++;
 
