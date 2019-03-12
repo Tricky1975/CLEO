@@ -637,6 +637,17 @@ namespace CLEO
                         if (cury == Doc.Length) curx = 0;
                         else if (curx > Doc[cury].Length) curx = Doc[cury].Length;
                         break;
+                    case ConsoleKey.PageUp:
+                        cury -= Console.WindowHeight;
+                        if (cury < 0) cury = 0;
+                        break;
+                    case ConsoleKey.PageDown:
+                        cury += Console.WindowHeight;
+                        if (cury > Doc.Length) cury = Doc.Length;
+                        break;
+                    default:
+                        Console.Beep();
+                        break;
                 }
             }
         }
