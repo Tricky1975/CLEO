@@ -490,6 +490,14 @@ namespace CLEO
         static int wh;
         void AutoResize() {
             if (ww != Console.WindowWidth || wh != Console.WindowHeight) Redraw();
+            if (cury < scry) {
+                scry = cury - 5;
+                if (scry < 0) scry = 0;
+                Redraw();
+            } else if (cury-scry > Console.WindowHeight - 3) {
+                scry += cury+5;
+                Redraw();
+            }
         }
 
         void Flow()
