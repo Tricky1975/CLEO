@@ -25,6 +25,7 @@
 // EndLic
 
 
+
 #undef KeyOnExit
 #define ColorStrict  // if set the program will crash when an unknown color has been set!
 #undef Log
@@ -240,51 +241,29 @@ namespace CLEO
         }
 
         static void FootMessage(string m) {
-
             QColor("FOOT");
-
             Locate(0, -1);
-
             for (int i = 0; i < Console.WindowWidth - 2; ++i) Console.Write(" ");
-
             Locate(0, -1,true);
-
             Console.Write(m);
-
         }
 
-        void Save()
-        {
+        void Save() {
             try {
-
                 var bout = QuickStream.WriteFile(FileName);
-
                 FootMessage($"Saving {FileName}");
-
                 for(int i = 0; i < Doc.Length; i++) {
-
                     if (i > 0) bout.WriteString(EOLN, true);
-
                     bout.WriteString(Doc[i],true);
-
                 }
-
                 bout.Close();
-
                 modified = false;
-
             } catch (Exception e) {
-
                 FootMessage($"ERROR! Saving failed -- {e.Message}");
-
                 Console.Beep();
-
                 Console.ReadKey();
-
             } finally {
-
                 Redraw();
-
             }
         }
 
