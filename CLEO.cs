@@ -171,7 +171,7 @@ namespace CLEO
         void DrawLine(int linnum, bool force = false)
         {
             // This routine is SLOW! I hope I can produce something faster in the future but for now this'll have to do!
-            if (force || (linnum - scry + 1) < Console.WindowHeight - 2) {
+            if (force || (linnum - scry + 1) < Console.WindowHeight - 1) {
                 var w = Console.WindowWidth - 1;
                 // Auto left-right scroll
                 if (curx < scrx) scrx = scrx - 10;
