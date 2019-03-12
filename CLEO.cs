@@ -21,10 +21,8 @@
 // Please note that some references to data like pictures or audio, do not automatically
 // fall under this licenses. Mostly this is noted in the respective files.
 // 
-// Version: 19.03.11
+// Version: 19.03.12
 // EndLic
-
-
 
 
 #undef KeyOnExit
@@ -103,7 +101,8 @@ namespace CLEO
             if (x < 0) rx = Console.WindowWidth + x;
             if (y < 0) ry = Console.WindowHeight + y;
             //LOG($"Locate({x},{y}) => ({rx},{ry})   -- Winsize: {Console.WindowWidth}x{Console.WindowHeight}");
-            Console.SetCursorPosition(rx, ry);
+            if (rx>=0 && ry>=0 && rx<Console.WindowWidth && ry<Console.WindowHeight)
+                Console.SetCursorPosition(rx, ry);
         }
 
         static bool caps = false;
@@ -210,6 +209,9 @@ namespace CLEO
 
         void Redraw()
         {
+            ww = Console.WindowWidth;
+            wh = Console.WindowHeight;
+
             // Clear screen from all junk still living there
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Black;
@@ -483,8 +485,16 @@ namespace CLEO
             modified = true;
         }
 
+
+        static int ww;
+        static int wh;
+        void AutoResize() {
+            if (ww != Console.WindowWidth || wh != Console.WindowHeight) Redraw();
+        }
+
         void Flow()
         {
+            AutoResize();
             UCaps();
             UpdateCursorPos();
             CursorLocate();
@@ -780,7 +790,7 @@ namespace CLEO
 #else
             var fpgood = fp.Parse();
 #endif
-            MKL.Version("CLEO - CLEO.cs","19.03.11");
+            MKL.Version("CLEO - CLEO.cs","19.03.12");
             MKL.Lic    ("CLEO - CLEO.cs","GNU General Public License 3");
             Console.WriteLine($"CLEO v{MKL.Newest}");
             Console.WriteLine("Coded by: Jeroen P. Broks");
