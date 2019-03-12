@@ -265,6 +265,7 @@ __pycache__/
 License.MKL.gini
 MKL_Backup
 test
+intaller/bin
 
 # Not that I plan to update this on Mac anymore, but in case I will
 .DS_Store
