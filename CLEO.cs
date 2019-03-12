@@ -500,6 +500,24 @@ namespace CLEO
             }
         }
 
+        void KeyDelete() {
+            if (cury == Doc.Length) return;
+            if (curx == Doc[cury].Length) {
+                if (cury == Doc.Length - 1) return;
+                Doc[cury] += Doc[cury + 1];
+                for (int i = cury + 1; i < Doc.Length - 1; i++) Doc[i] = Doc[i + 1];
+                Array.Resize(ref Doc, Doc.Length - 1);
+                Redraw();
+                return;
+            }
+            if (curx == 0)
+                Doc[cury] = qstr.Right(Doc[cury], Doc[cury].Length - 1);
+            else
+                Doc[cury] = $"{qstr.Left(Doc[cury], curx)}{qstr.Right(Doc[cury], Doc[cury].Length-(curx+1))}";
+            DrawLine(cury);
+            modified = true;
+        }
+
         void Flow()
         {
             AutoResize();
@@ -605,6 +623,9 @@ namespace CLEO
                         break;
                     case ConsoleKey.RightArrow:
                         RightArrow();
+                        break;
+                    case ConsoleKey.Delete:
+                        KeyDelete();
                         break;
                     case ConsoleKey.UpArrow:
                         if (cury > 0) cury--;
