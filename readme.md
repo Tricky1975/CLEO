@@ -15,9 +15,9 @@ Second, notepad, opens a window and that is precisely what I do NOT want. Want w
 
 I hope you're kidding! If not, maybe I can recommend you to find a good psychiatrist since you really need one, or you wouldn't have asked me that question. And that summarizes how I think about VIM!
 
-### WIP
+### Beta
 
-This is yet a work in progress. I will only release binaries once the tool has been fully set up to work satisfactory.
-Since this has been written in C# to work on .NET you may be able to use it on Mac and Linux as well when you have Mono installed. ;)
+This version is technically still a beta
+This basically should work   although I just found out by using CLEO on mac that non spaces letters and numbers do not work on mono on mac so I may need to sort that one out
 
-![](https://i.imgur.com/fw33lG4.png)
+But it was primary meant for Windows anyway
