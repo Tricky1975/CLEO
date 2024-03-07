@@ -1,10 +1,10 @@
 // Lic:
-// CLEO - Command Line Editor Oversimplefied
-// Just a simple editor to replace EDIT.COM
+// CLEO
+// CLEO
 // 
 // 
 // 
-// (c) Jeroen P. Broks, 
+// (c) Jeroen P. Broks, 2019, 2024
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 // Please note that some references to data like pictures or audio, do not automatically
 // fall under this licenses. Mostly this is noted in the respective files.
 // 
-// Version: 19.03.12
+// Version: 24.03.07
 // EndLic
 
 
@@ -789,62 +789,69 @@ namespace CLEO
 
         static void Main(string[] args)
         {
-            LOG("Session Started! Log Created");
+            try {
+                LOG("Session Started! Log Created");
 #if Log
             Console.WriteLine($"PLEASE NOTE! All progress will be logged this time in {Dirry.C("$AppSupport$/ CLEO / CLEO_DEBUG_LOG.TXT")}");
             Console.Beep();
 #endif
 #if debugdoc
-            var fp = new FlagParse(new string[] { "../../test/test.txt" });
+                var fp = new FlagParse(new string[] { "../../test/test.txt" });
 #else
             var fp = new FlagParse(args);
 #endif
-            LoadConfig();
-            fp.CrBool("version", false);
-            fp.CrBool("wineoln", false); // When set new files will always have the Windows EOLN otherwise EOLN will be set to the unix way.
-            fp.CrBool("configure", false);
-            fp.CrInt("tabsize", 8);
+                LoadConfig();
+                fp.CrBool("version", false);
+                fp.CrBool("wineoln", false); // When set new files will always have the Windows EOLN otherwise EOLN will be set to the unix way.
+                fp.CrBool("configure", false);
+                fp.CrInt("tabsize", 8);
 #if FlagChat
             Console.WriteLine("Parsing cli input");
             var fpgood = fp.Parse(true);
             Console.WriteLine();
 #else
-            var fpgood = fp.Parse();
+                var fpgood = fp.Parse();
 #endif
-            MKL.Version("CLEO - CLEO.cs","19.03.12");
-            MKL.Lic    ("CLEO - CLEO.cs","GNU General Public License 3");
-            Console.WriteLine($"CLEO v{MKL.Newest}");
-            Console.WriteLine("Coded by: Jeroen P. Broks");
-            Console.WriteLine($"(c) Copyright {MKL.CYear(2019)}, Released under the terms of the General Public License v3\n");
-            if (!fpgood) { Console.WriteLine("Invalid cli input!"); return; }
-            if (fp.GetBool("version")) ShowVersionInfo();
-            if (fp.GetInt("tabsize") < 3 || fp.GetInt("tabsize") > 12) { Console.WriteLine("TabSize must be between 3 and 12"); return; }
-            if (fp.GetBool("configure")) {
-                if (!File.Exists(ConfigFile)) {
-                    Directory.CreateDirectory(qstr.ExtractDir(ConfigFile));
-                    config.SaveSource(ConfigFile);
+                MKL.Version("CLEO - CLEO.cs","24.03.07");
+                MKL.Lic    ("CLEO - CLEO.cs","GNU General Public License 3");
+                Console.WriteLine($"CLEO v{MKL.Newest}");
+                Console.WriteLine("Coded by: Jeroen P. Broks");
+                Console.WriteLine($"(c) Copyright {MKL.CYear(2019)}, Released under the terms of the General Public License v3\n");
+                if (!fpgood) { Console.WriteLine("Invalid cli input!"); return; }
+                if (fp.GetBool("version")) ShowVersionInfo();
+                if (fp.GetInt("tabsize") < 3 || fp.GetInt("tabsize") > 12) { Console.WriteLine("TabSize must be between 3 and 12"); return; }
+                if (fp.GetBool("configure")) {
+                    if (!File.Exists(ConfigFile)) {
+                        Directory.CreateDirectory(qstr.ExtractDir(ConfigFile));
+                        config.SaveSource(ConfigFile);
+                    }
+                    CLEOs = new CLEO[] { new CLEO(ConfigFile.Replace("\\", "/"), fp) };
+                } else {
+                    if (fp.Args.Length == 0) {
+                        Console.WriteLine("Usage: CLEO <file to edit>");
+                        Console.WriteLine("\tEdits a file");
+                        Console.WriteLine("Usage: CLEO -version");
+                        Console.WriteLine("\tDetailed version information");
+                        return;
+                    }
+                    CLEOs = new CLEO[fp.Args.Length];
+                    for (int i = 0; i < fp.Args.Length; i++) CLEOs[i] = new CLEO(fp.Args[i], fp);
                 }
-                CLEOs = new CLEO[] { new CLEO(ConfigFile.Replace("\\", "/"), fp) };
-            } else {
-                if (fp.Args.Length == 0) {
-                    Console.WriteLine("Usage: CLEO <file to edit>");
-                    Console.WriteLine("\tEdits a file");
-                    Console.WriteLine("Usage: CLEO -version");
-                    Console.WriteLine("\tDetailed version information");
-                    return;
-                }
-                CLEOs = new CLEO[fp.Args.Length];
-                for (int i = 0; i < fp.Args.Length; i++) CLEOs[i] = new CLEO(fp.Args[i], fp);
-            }
-            CLEOs[0].Redraw(); // Only logic to start with the first document, no?
-            while (true) CLEOs[docn].Flow();
+                CLEOs[0].Redraw(); // Only logic to start with the first document, no?
+                while (true) CLEOs[docn].Flow();
 #if KeyOnExit
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ReadKey();
 #endif
+            } catch(Exception e) {
+                QCol.QuickError(e.Message);
+#if DEBUG
+                QCol.Magenta($"{e.StackTrace}\n");
+#endif
+                Console.ResetColor();
+            }
         }
     }
 
 }
-

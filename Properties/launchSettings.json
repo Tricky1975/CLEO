@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CLEO": {
+      "commandName": "Project",
+      "commandLineArgs": "E:\\Temp\\Cleo_test.txt"
+    }
+  }
+}
